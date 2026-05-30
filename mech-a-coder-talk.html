@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- - ABSTRACT
+         A first-year FRC software mentor reflects on the transition from FLL to FRC. The session covers useful resources for getting started and discusses the techniques used to teach rookie software students on Team 6328 (Mechanical Advantage). A new open-source interactive learning tool, Mech-A Coder, is introduced to help teams build foundational software skills. The session concludes with speculation on the future of software development and mentorship in an era of rapid technological change.
+    -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Year in the Pits and the Bits · FRC NE Mentor Conference 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'Orbitron';
+  src: url('Orbitron.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* Mech-A Coder deep navy palette */
+  --bg:#09101f;
+  --bg-card:rgba(8,16,46,0.50);
+  --bg-card-h:rgba(12,24,60,0.65);
+  --gold:#e8a020;
+  --gold2:#f5c842;
+  /* vivid blue from the MECHA CODER logo */
+  --blue:#2d7bff;
+  --blue2:#5b9bff;
+  --blue3:#8ab4f8;
+  /* VS Code Dark+ syntax palette */
+  --vsc-kw:#569cd6;    /* keywords: public class void */
+  --vsc-ty:#4ec9b0;    /* types: TalonFX, SubsystemBase */
+  --vsc-st:#ce9178;    /* strings */
+  --vsc-nu:#b5cea8;    /* numbers */
+  --vsc-cm:#6a9955;    /* comments */
+  --vsc-me:#dcdcaa;    /* method names */
+  --vsc-op:#d4d4d4;    /* operators */
+  --vsc-tx:#d4d4d4;    /* plain text */
+  /* presentation utility */
+  --green:#4ec9b0;
+  --purple:#c586c0;
+  --red:#f44767;
+  --orange:#ce9178;
+  --text:#c8d3e8;
+  --muted:#6e7898;
+  /* glass tokens */
+  --gborder:rgba(45,123,255,0.22);
+  --gshadow:0 8px 40px rgba(0,0,0,0.6),inset 0 1px 0 rgba(80,140,255,0.10);
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow:hidden;}
+
+#deck{
+  width:100vw;height:100vh;position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse 80% 70% at 8%  8%,  rgba(15,55,200,0.28) 0%,transparent 100%),
+    radial-gradient(ellipse 70% 60% at 92% 92%,  rgba(70,15,180,0.22) 0%,transparent 100%),
+    radial-gradient(ellipse 50% 45% at 50% 50%,  rgba(9,18,42,0.50) 0%,transparent 100%),
+    radial-gradient(ellipse 35% 35% at 78% 22%,  rgba(45,123,255,0.09) 0%,transparent 100%),
+    #09101f;
+}
+
+/* large blurred backdrop blobs */
+.blob{position:absolute;border-radius:50%;pointer-events:none;z-index:0;filter:blur(100px);}
+
+/* permanent background code grid — gives backdrop-filter something to blur */
+canvas#bgc{position:absolute;inset:0;z-index:1;pointer-events:none;}
+canvas#asc{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity 0.28s;}
+.scanline{position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.02) 3px,rgba(0,0,0,0.02) 4px);
+  pointer-events:none;z-index:2;}
+
+/* ── SLIDES ───────────────────────────────────────────────────────────────── */
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:center;align-items:flex-start;
+  padding:60px 80px;z-index:3;opacity:0;pointer-events:none;transition:opacity 0.28s;
+}
+.slide.active{opacity:1;pointer-events:all;}
+.slide.center{align-items:center;text-align:center;}
+.inner{max-width:960px;width:100%;}
+
+.tag{
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue2);
+  letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:20px;opacity:0.65;
+}
+h1{font-family:'Orbitron','Space Grotesk',sans-serif;font-size:clamp(32px,4.6vw,68px);font-weight:700;line-height:1.08;margin-bottom:24px;color:var(--blue2);letter-spacing:0.03em;}
+h2{font-family:'Orbitron','Space Grotesk',sans-serif;font-size:clamp(22px,3vw,46px);font-weight:700;line-height:1.12;margin-bottom:18px;color:var(--blue2);letter-spacing:0.03em;}
+.lead{font-size:clamp(15px,1.6vw,21px);color:var(--muted);line-height:1.65;max-width:700px;margin-bottom:30px;}
+.slide.center .lead{margin-left:auto;margin-right:auto;}
+
+/* color utilities — matching VS Code palette for dual code/prose use */
+.y{color:var(--gold2);}
+.b{color:var(--blue3);}
+.g{color:var(--green);}
+.p{color:var(--purple);}
+.r{color:var(--orange);}
+.m{color:var(--muted);}
+
+/* ── CORNER-BRACKET GLASS mixin ─────────────────────────────────────────── */
+/* Applied via .bracket class or per-component */
+.bracket-tl::before,
+.fcard::before, .stat::before, .frow::before, .bigq::before {
+  content:'';position:absolute;top:-2px;left:-2px;
+  width:20px;height:20px;
+  border-top:2px solid var(--gold);
+  border-left:2px solid var(--gold);
+  border-radius:2px 0 0 0;
+  pointer-events:none;z-index:1;
+}
+.bracket-br::after,
+.fcard::after, .stat::after, .frow::after, .bigq::after {
+  content:'';position:absolute;bottom:-2px;right:-2px;
+  width:20px;height:20px;
+  border-bottom:2px solid var(--gold);
+  border-right:2px solid var(--gold);
+  border-radius:0 0 2px 0;
+  pointer-events:none;z-index:1;
+}
+
+/* ── QUOTE — corner bracket glass ──────────────────────────────────────── */
+.bigq{
+  position:relative;
+  font-size:clamp(18px,2.4vw,38px);font-weight:600;line-height:1.3;
+  background:rgba(8,16,48,0.48);
+  backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);
+  border:1px solid rgba(45,123,255,0.22);
+  border-radius:3px;
+  padding:20px 22px 20px 26px;margin:14px 0 22px;
+  box-shadow:var(--gshadow);
+}
+
+/* ── CODE BLOCK — VS Code aesthetic glass ────────────────────────────────── */
+.code{
+  background:rgba(4,8,22,0.80);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(45,123,255,0.14);border-radius:4px;
+  padding:26px 26px 22px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(11px,1.25vw,16px);line-height:1.85;
+  position:relative;
+  box-shadow:var(--gshadow);
+}
+.code::before{
+  content:'';position:absolute;top:13px;left:15px;width:10px;height:10px;border-radius:50%;
+  background:#ff5f56;box-shadow:18px 0 0 #ffbd2e,36px 0 0 #27c93f;
+}
+.cl{display:block;}
+/* VS Code current-line highlight style */
+.hl{
+  background:rgba(45,123,255,0.10);
+  border-left:2px solid var(--blue2);
+  padding-left:8px;margin-left:-10px;
+}
+
+/* ── BULLETS ──────────────────────────────────────────────────────────────── */
+.bullets{list-style:none;display:flex;flex-direction:column;gap:15px;margin-top:6px;}
+.bullets li{display:flex;gap:14px;align-items:flex-start;font-size:clamp(14px,1.55vw,20px);line-height:1.45;}
+.bul{font-family:'JetBrains Mono',monospace;color:var(--gold);flex-shrink:0;margin-top:2px;}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start;margin-top:10px;}
+
+/* ── TIMELINE ─────────────────────────────────────────────────────────────── */
+.tl{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+.tli{display:flex;gap:16px;align-items:stretch;}
+.tll{display:flex;flex-direction:column;align-items:center;width:34px;flex-shrink:0;}
+.tldot{width:12px;height:12px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--gold);flex-shrink:0;margin-top:5px;}
+.tlline{width:2px;flex:1;background:rgba(45,123,255,0.20);margin-top:4px;min-height:14px;}
+.tlc{padding-bottom:18px;flex:1;}
+.tltitle{font-size:clamp(13px,1.35vw,18px);font-weight:600;margin-bottom:3px;}
+.tldesc{font-size:clamp(11px,1vw,14px);color:var(--muted);line-height:1.55;}
+
+/* ── FEATURE CARDS — corner bracket glass ───────────────────────────────── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.fcard{
+  position:relative;
+  background:var(--bg-card);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);
+  border:1px solid var(--gborder);border-radius:3px;padding:18px 20px;
+  box-shadow:var(--gshadow);transition:background 0.2s,border-color 0.2s;
+}
+.fcard:hover{background:var(--bg-card-h);border-color:rgba(45,123,255,0.32);}
+.flabel{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.ftitle{font-size:clamp(12px,1.25vw,16px);font-weight:600;margin-bottom:5px;}
+.fdesc{font-size:clamp(11px,1vw,13px);color:var(--muted);line-height:1.5;}
+
+/* ── BADGES ───────────────────────────────────────────────────────────────── */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:5px 11px;border-radius:3px;margin:3px 3px 3px 0;font-weight:600;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.by{background:rgba(232,160,32,0.12);color:var(--gold2);border:1px solid rgba(232,160,32,0.28);}
+.bb{background:rgba(45,123,255,0.12);color:var(--blue3);border:1px solid rgba(45,123,255,0.28);}
+.bg{background:rgba(78,201,176,0.12);color:var(--green);border:1px solid rgba(78,201,176,0.28);}
+.bp{background:rgba(197,134,192,0.12);color:var(--purple);border:1px solid rgba(197,134,192,0.28);}
+
+/* ── STATS — corner bracket glass ────────────────────────────────────────── */
+.stats{display:flex;gap:14px;margin-top:18px;}
+.stat{
+  position:relative;
+  background:var(--bg-card);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);
+  border:1px solid var(--gborder);border-radius:3px;padding:16px 20px;flex:1;
+  box-shadow:var(--gshadow);
+}
+.sn{font-size:clamp(24px,3vw,46px);font-weight:700;color:var(--gold2);font-family:'JetBrains Mono',monospace;}
+.sl{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* ── NAV — heavy glass ────────────────────────────────────────────────────── */
+#nav{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:100;display:flex;align-items:center;gap:10px;
+  background:rgba(5,10,24,0.78);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);
+  border:1px solid rgba(45,123,255,0.16);border-radius:40px;padding:9px 18px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.7),inset 0 1px 0 rgba(80,140,255,0.05);
+}
+#nav button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px 8px;border-radius:6px;transition:color 0.15s,background 0.15s;font-family:'JetBrains Mono',monospace;}
+#nav button:hover{color:var(--gold2);background:rgba(255,255,255,0.05);}
+#ctr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);min-width:48px;text-align:center;}
+#dots{display:flex;gap:6px;align-items:center;}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(45,123,255,0.28);transition:background 0.2s,transform 0.2s;cursor:pointer;}
+.dot.on{background:var(--gold);transform:scale(1.4);}
+
+#logo{position:fixed;top:18px;left:24px;z-index:100;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);opacity:0.40;}
+#logo span{color:var(--gold);}
+#slnum{position:fixed;top:18px;right:24px;z-index:100;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);opacity:0.28;}
+.kbhint{position:fixed;bottom:66px;right:24px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);opacity:0.22;text-align:right;line-height:1.9;}
+
+/* ── FULL-WIDTH FEATURE ROW — corner bracket glass ───────────────────────── */
+.frow{
+  position:relative;
+  background:var(--bg-card);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);
+  border:1px solid var(--gborder);border-radius:3px;
+  padding:15px 18px;margin-top:12px;display:flex;gap:18px;align-items:flex-start;
+  box-shadow:var(--gshadow);
+}
+.frow .ftitle{font-size:clamp(12px,1.2vw,16px);}
+
+/* ── MEDIA SLIDES (screenshot / video) ──────────────────────────────────── */
+.slide.media{padding:24px 40px;justify-content:center;align-items:center;}
+.media-frame{
+  display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;
+}
+.media-frame img,.media-frame video{
+  max-width:100%;max-height:76vh;object-fit:contain;
+  border-radius:6px;border:1px solid var(--gborder);
+  box-shadow:var(--gshadow);display:block;
+}
+
+/* ── BIO GRID ──────────────────────────────────────────────────────────── */
+.bio-grid{
+  display:grid;grid-template-columns:390px 1fr;gap:52px;
+  align-items:center;max-width:980px;width:100%;
+}
+.bio-portrait{
+  width:100%;max-height:580px;object-fit:cover;object-position:top center;
+  border-radius:6px;border:1px solid var(--gborder);box-shadow:var(--gshadow);
+  display:block;
+}
+#sbio h2{font-size:clamp(33px,4.5vw,69px);}
+#sbio .bullets li{font-size:clamp(18px,2.1vw,28px);}
+#sbio .badge{font-size:14px;padding:7px 15px;}
+
+/* ── KEYWORD GLOW — overlays the exact bgc canvas cell ──────────────────── */
+#kwflash{
+  position:fixed;z-index:2;pointer-events:none;
+  font-family:'JetBrains Mono',monospace;
+  font-weight:400;          /* matches canvas default weight */
+  line-height:1;
+  white-space:pre;          /* preserve exact character spacing */
+  opacity:0;
+  /* font-size / left / top set dynamically to match bgc grid geometry */
+}
+
+/* ── TEAM LOGO ─────────────────────────────────────────────────────────────── */
+#team-logo{
+  position:fixed;bottom:76px;right:24px;z-index:99;pointer-events:none;
+}
+#team-logo img{width:180px;height:auto;display:block;opacity:0.62;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.6));}
+/* Remove corner brackets on specific cards while keeping glass */
+.fcard.no-bracket::before,.fcard.no-bracket::after{display:none;}
+</style>
+</head>
+<body>
+<div id="deck">
+  <!-- Glassmorphism backdrop blobs — Mech-A Coder navy palette -->
+  <div class="blob" style="width:1200px;height:1200px;top:-450px;left:-450px;background:radial-gradient(circle,rgba(15,60,220,0.28) 0%,transparent 70%);"></div>
+  <div class="blob" style="width:1000px;height:1000px;bottom:-400px;right:-400px;background:radial-gradient(circle,rgba(75,18,200,0.22) 0%,transparent 70%);"></div>
+  <div class="blob" style="width:700px;height:700px;top:25%;right:5%;background:radial-gradient(circle,rgba(45,123,255,0.12) 0%,transparent 70%);"></div>
+  <div class="blob" style="width:500px;height:500px;bottom:15%;left:15%;background:radial-gradient(circle,rgba(232,160,32,0.06) 0%,transparent 70%);"></div>
+
+  <canvas id="bgc"></canvas>
+  <canvas id="asc"></canvas>
+  <div class="scanline"></div>
+
+  <!-- 0: TITLE -->
+  <section class="slide center active" id="s0">
+    <div class="inner">
+      <span class="tag">// FRC New England Mentor Conference · 2026</span>
+      <h1>
+        <span class="y">One</span> Year in the<br>
+        Pits &amp; the <span class="y">Bits</span>
+      </h1>
+      <p class="lead">What I learned mentoring software, what I built,<br>and what I'd tell myself on day one.</p>
+      <div>
+        <span class="badge by">Software Mentor · Team 6328</span>
+        <span class="badge bb">First Year Retrospective</span>
+        <span class="badge bg">Open Source Demo</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIO: SPEAKER INTRO -->
+  <section class="slide center" id="sbio">
+    <div class="bio-grid">
+      <img src="dan-portrait.png" alt="Dan Murphy" class="bio-portrait">
+      <div style="text-align:left;">
+        <span class="tag">// meet.the.speaker()</span>
+        <h2>Dan <span class="y">Murphy</span></h2>
+        <ul class="bullets" style="margin-top:20px;">
+          <li><span class="bul">▸</span><span>FLL Mentor &nbsp;·&nbsp; <span class="y">5 years</span></span></li>
+          <li><span class="bul">▸</span><span>FRC Mentor &nbsp;·&nbsp; <span class="b">1 year</span></span></li>
+          <li><span class="bul">▸</span><span>Writing Code &nbsp;·&nbsp; <span class="g">40 years</span></span></li>
+        </ul>
+        <div style="margin-top:26px;">
+          <span class="badge by">Team 6328 · Mechanical Advantage</span>
+          <span class="badge bb">dan.murphy@littletonrobotics.org</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1: FIRST THINGS FIRST -->
+  <section class="slide" id="s1">
+    <div class="inner">
+      <span class="tag">// 01 · first.things.first()</span>
+      <h2>From FLL to FRC:<br>It's a <span class="y">Cliff</span></h2>
+      <ul class="bullets">
+        <li><span class="bul">▸</span><span><span class="g">FLL sets the pace</span>: structured, scaffolded, approachable. Then FRC happens.</span></li>
+        <li><span class="bul">▸</span><span>Six-week build season. Real hardware. Real stakes. Real students. <span class="y">No guardrails.</span></span></li>
+        <li><span class="bul">▸</span><span>The game manual is code. Explore it as such. NotebookLM & quizzes work!</span></li>
+        <li><span class="bul">▸</span><span>The hard part isn't the code. <span class="y">It is the domain knowledge.</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2: COMMUNITY -->
+  <section class="slide" id="s2">
+    <div class="inner">
+      <span class="tag">// 02 · community.connect()</span>
+      <h2>You're Not <span class="y">Alone</span><br>in the Pits</h2>
+      <div class="bigq">We tell the students:<br><span class="y">learn, have fun, make a friend.</span><br><span class="m" style="font-weight:400;font-size:0.74em">Good advice for mentors too. Even introverted software ones.</span></div>
+      <div class="fgrid">
+        <div class="fcard no-bracket">
+          <div class="flabel">channel</div>
+          <div class="ftitle b">NE Mentor Slack</div>
+          <div class="fdesc">Regional community. Ask the dumb questions. Everyone has been there.</div>
+        </div>
+        <div class="fcard no-bracket">
+          <div class="flabel">forum</div>
+          <div class="ftitle y">Chief Delphi</div>
+          <div class="fdesc">The FIRST brain trust. Read a lot, and write a little.</div>
+        </div>
+        <div class="fcard no-bracket">
+          <div class="flabel">workspace</div>
+          <div class="ftitle g">Team Slack</div>
+          <div class="fdesc">Build a transparent async channel with students, parents, and co-mentors from day one.</div>
+        </div>
+        <div class="fcard no-bracket">
+          <div class="flabel">culture</div>
+          <div class="ftitle p">Gracious Professionalism</div>
+          <div class="fdesc">Not just a phrase. The whole FIRST community practices it. It really is different.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: TRAINING FUNDAMENTALS -->
+  <section class="slide" id="s3">
+    <div class="inner">
+      <span class="tag">// 03 · training.fundamentals()</span>
+      <h2>Teaching Software:<br>The <span class="y">Foundation</span></h2>
+      <div class="two" style="grid-template-columns:1fr 1.5fr;">
+        <ul class="bullets">
+          <li><span class="bul">▸</span><span><span class="y">Familiarity over mastery</span>: they don't need to own Java, they need to read it. Fluency comes from immersion.</span></li>
+          <li><span class="bul">▸</span><span><span class="b">Acknowledge Java's verbosity.</span> Describe the forest, then zoom to a tree.</span></li>
+          <li><span class="bul">▸</span><span><span class="b">Minimize time-to-code</span>: second session ends with typing in Java and compiling it.</span></li>
+          <li><span class="bul">▸</span><span>Learning how to learn: Javadoc, compiler errors, stack traces, asking better questions, LLMs</span></li>
+          <li><span class="bul">▸</span><span style="color:var(--gold2);font-weight:600;">Stickers. Seriously. Stickers.</span></li>
+        </ul>
+        <div class="code">
+<span class="cl"><span style="color:var(--vsc-kw)">public</span> <span style="color:var(--vsc-me)">Shooter</span>(</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-ty)">ShooterIO</span> io,</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-ty)">DoubleSupplier</span> targetPowerSupplier,</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-ty)">Supplier</span>&lt;<span style="color:var(--vsc-ty)">Pose2d</span>&gt; poseSupplier,</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-ty)">BooleanSupplier</span> demoModeSub) {</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-kw)">this</span>.io = io;</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-kw)">this</span>.targetPowerSupplier = targetPowerSupplier;</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-kw)">this</span>.poseSupplier = poseSupplier;</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-kw)">this</span>.demoModeSub = demoModeSub;</span>
+<span class="cl">&nbsp;&nbsp;}</span>
+<span class="cl">&nbsp;</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-me)">@Override</span></span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-kw)">public void</span> <span style="color:var(--vsc-me)">periodic</span>() {</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;io.<span style="color:var(--vsc-me)">updateInputs</span>(inputs);</span>
+<span class="cl hl">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-ty)">Logger</span>.<span style="color:var(--vsc-me)">processInputs</span>(<span style="color:var(--vsc-st)">"Shooter"</span>, inputs);</span>
+<span class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--vsc-me)">updateSimState</span>();</span>
+<span class="cl">&nbsp;&nbsp;}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4: MECH-A CODER -->
+  <section class="slide center" id="s4">
+    <div class="inner">
+      <span class="tag">// 04 · new MechACoder() → demo()</span>
+      <h1>Mech<span class="y">-A-</span>Coder</h1>
+      <p class="lead">Browser-based FRC Java training — <strong style="color:var(--green)">CodingBat</strong> with robot context.<br>Open source by Team 6328 · Mechanical Advantage.</p>
+      <div style="margin-bottom:22px;">
+        <span class="badge by">Monaco IDE in browser</span>
+        <span class="badge bb">Real Java compiler</span>
+        <span class="badge bg">Unit tests · TDD by default</span>
+        <span class="badge bp">Google Auth + Leaderboards</span>
+      </div>
+      <div class="stats" style="max-width:540px;margin:0 auto;">
+        <div class="stat"><div class="sn">6328</div><div class="sl">Built by Mech Advantage</div></div>
+        <div class="stat"><div class="sn" style="color:var(--green)">OSS</div><div class="sl">Open source forever</div></div>
+        <div class="stat"><div class="sn" style="color:var(--blue3)">∞</div><div class="sl">Any team can use it today</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4a: MECH-A CODER SCREENSHOT 1 -->
+  <section class="slide center media" id="smca1">
+    <div class="media-frame">
+      <span class="tag">// mech-a-coder · login &amp; dashboard</span>
+      <img src="mecha-coder-1.png" alt="Mech-A Coder login screen">
+    </div>
+  </section>
+
+  <!-- 4b: MECH-A CODER SCREENSHOT 3 (swapped) -->
+  <section class="slide center media" id="smca3">
+    <div class="media-frame">
+      <span class="tag">// mech-a-coder · leaderboard</span>
+      <img src="mecha-coder-3.png" alt="Mech-A Coder leaderboard">
+    </div>
+  </section>
+
+  <!-- 4c: MECH-A CODER SCREENSHOT 2 (swapped) -->
+  <section class="slide center media" id="smca2">
+    <div class="media-frame">
+      <span class="tag">// mech-a-coder · challenge editor</span>
+      <img src="mecha-coder-2.png" alt="Mech-A Coder challenge editor">
+    </div>
+  </section>
+
+  <!-- 5: HANDS ON -->
+  <section class="slide" id="s5">
+    <div class="inner">
+      <span class="tag">// 05 · robot.learn_by_doing()</span>
+      <h2>Learning By <span class="y">Doing</span></h2>
+      <div class="tl">
+        <div class="tli">
+          <div class="tll"><div class="tldot"></div><div class="tlline"></div></div>
+          <div class="tlc"><div class="tltitle"><span class="y">CodingBat → Mech-A Coder</span></div><div class="tldesc">Bridge from general Java to FRC Java. Self-paced challenges build intuition before they touch hardware. Leaderboard keeps them coming back.</div></div>
+        </div>
+        <div class="tli">
+          <div class="tll"><div class="tldot" style="background:var(--blue2);box-shadow:0 0 0 2px var(--blue2)"></div><div class="tlline"></div></div>
+          <div class="tlc"><div class="tltitle"><span class="b">Learning how to learn</span></div><div class="tldesc">Javadoc navigation. Stack trace debugging. Asking better questions. Skills that outlast any one game year.</div></div>
+        </div>
+        <div class="tli">
+          <div class="tll"><div class="tldot" style="background:var(--green);box-shadow:0 0 0 2px var(--green)"></div><div class="tlline"></div></div>
+          <div class="tlc"><div class="tltitle"><span class="g">Dance Party / RoboRave</span></div><div class="tldesc">First hands-on robot session. Music, LEDs, drive commands. The moment they stop being students and start being engineers.</div></div>
+        </div>
+        <div class="tli">
+          <div class="tll"><div class="tldot" style="background:var(--purple);box-shadow:0 0 0 2px var(--purple)"></div></div>
+          <div class="tlc"><div class="tltitle"><span class="p">Self-paced rewards that stick</span></div><div class="tldesc">Badges, leaderboard position, stickers. Intrinsic motivation catches fire when they see their name move up.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5a: KITBOT DANCE VIDEO -->
+  <section class="slide center media" id="svideo">
+    <div class="media-frame">
+      <span class="tag">// kitbot.dance() · sandstorm</span>
+      <video controls preload="metadata" playsinline onloadedmetadata="this.currentTime=11" style="max-width:100%;max-height:76vh;border-radius:6px;border:1px solid var(--gborder);box-shadow:var(--gshadow);display:block;">
+        <source src="kitbot-sandstorm.mov" type="video/quicktime">
+        <source src="kitbot-sandstorm.mov" type="video/mp4">
+      </video>
+    </div>
+  </section>
+
+  <!-- 6: THE ELEPHANT -->
+  <section class="slide" id="s6">
+    <div class="inner">
+      <span class="tag">// 06 · ai.in_the_room()</span>
+      <h2>The <span class="y">Elephant</span><br>in the Room</h2>
+      <div class="bigq">
+        I don't write assembly anymore.<br>
+        <span class="y">That's fine.</span><br>
+        <span class="m" style="font-weight:400;font-size:0.76em">Knowing why it works still matters.</span>
+      </div>
+      <ul class="bullets">
+        <li><span class="bul">▸</span><span>Teaching software <span class="b">in the age of AI</span>: don't panic, embrace the metaphor.</span></li>
+        <li><span class="bul">▸</span><span><span class="y">Claude Code for non-profits</span>: inexpensive, powerful, and a teachable skill unto itself.</span></li>
+        <li><span class="bul">▸</span><span>Prompting is craft. <span class="g">Stretching context tokens</span> is craft. Teach students both.</span></li>
+        <li><span class="bul">▸</span><span>A hunger to peek under the hood. <span class="y">This will always be valuable.</span>. Maybe the most important thing to teach.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7: BUILDING TOMORROW -->
+  <section class="slide" id="s7">
+    <div class="inner">
+      <span class="tag">// 07 · future.engineers()</span>
+      <h2>Building Those Who<br>Build <span class="y">Tomorrow</span></h2>
+      <div class="two">
+        <ul class="bullets">
+          <li><span class="bul">▸</span><span><span class="y">Understanding the lower levels</span> is a differentiator. More so now than ever!</span></li>
+          <li><span class="bul">▸</span><span>When I hire: I look for people who understand <span class="b">why the abstraction exists.</span></span></li>
+          <li><span class="bul">▸</span><span>The student who debugged CAN bus at midnight? <span class="g">They get it.</span></span></li>
+          <li><span class="bul">▸</span><span>Your mentorship doesn't end at DCMP or Worlds. <span class="m">It can last a lifetime.</span></span></li>
+        </ul>
+        <div class="code">
+<span class="cl"><span style="color:var(--vsc-cm)">// What we're really teaching</span></span>
+<span class="cl"><span style="color:var(--vsc-kw)">return</span> <span style="color:var(--vsc-ty)">Stream</span>.of(</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-st)">"persistence"</span>,</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-st)">"debugging"</span>,</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-st)">"reading the docs"</span>,</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-st)">"asking for help"</span>,</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--vsc-st)">"shipping under pressure",</span>
+<span class="cl">&nbsp;&nbsp;<span style="color:var(--gold2)">"thinking critically"</span>
+<span class="cl">).<span style="color:var(--vsc-me)">map</span>(<span style="color:var(--vsc-ty)">Mentor</span>::<span style="color:var(--vsc-me)">growEngineer</span>)</span>
+<span class="cl">&nbsp;.<span style="color:var(--vsc-me)">collect</span>(<span style="color:var(--vsc-ty)">Collectors</span></span>
+<span class="cl">&nbsp;&nbsp;&nbsp;.<span style="color:var(--vsc-me)">toList</span>());</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8: CLOSE -->
+  <section class="slide center" id="s8">
+    <div class="inner">
+      <span class="tag">// 08 · session.close()</span>
+      <h1 style="font-size:clamp(20px,3vw,48px);line-height:1.18;">
+        An incredible year.<br>
+        An incredible community.<br>
+        No joy like <span class="y">lighting the spark.</span>
+      </h1>
+      <p class="lead" style="margin:26px auto 30px;">
+        Show up. Say yes sometimes when every instinct says no.<br>
+        Trust that your students will surprise you.
+      </p>
+      <div class="code" style="display:inline-flex;align-items:center;justify-content:center;padding:14px 40px;min-height:110px;">
+        <span><span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.35vw,17px);">return </span><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.35vw,17px);">GraciousProfessionalism.always();</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- THANKS: final slide — canvas-animated coalesce -->
+  <section class="slide" id="sthanks">
+    <canvas id="thanks-canvas" style="position:absolute;inset:0;"></canvas>
+  </section>
+</div>
+
+<!-- Background keyword flash -->
+<div id="kwflash"></div>
+
+<!-- Team logo — lower right, fixed -->
+<div id="team-logo"><img src="6328-logo.png" alt="Team 6328 Mechanical Advantage"></div>
+
+<!-- UI chrome -->
+<div id="logo"><span>6328</span> · One Year in the Pits &amp; Bits<br>Dan Murphy · dan.murphy@littletonrobotics.org</div>
+<div id="slnum">01</div>
+<div class="kbhint">← → or space to navigate</div>
+
+<div id="nav">
+  <button id="prev">◀</button>
+  <div id="dots"></div>
+  <span id="ctr">1 / 9</span>
+  <button id="next">▶</button>
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const N = slides.length;
+  let cur = 0, busy = false, rafId = null;
+
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className='dot'+(i===0?' on':'');
+    d.addEventListener('click',()=>go(i));
+    dotsEl.appendChild(d);
+  });
+
+  function updateUI(){
+    document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+    document.getElementById('ctr').textContent=(cur+1)+' / '+N;
+    document.getElementById('slnum').textContent=String(cur+1).padStart(2,'0');
+  }
+
+  // ── Transition canvas ─────────────────────────────────────────────────────
+  const canvas = document.getElementById('asc');
+  const ctx = canvas.getContext('2d');
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  resize();
+
+  // ── Persistent background code canvas ────────────────────────────────────
+  // Always-on low-opacity code grid so backdrop-filter has texture to blur.
+  const bgc = document.getElementById('bgc');
+  const bgCtx = bgc.getContext('2d');
+  function resizeBgc(){ bgc.width=window.innerWidth; bgc.height=window.innerHeight; }
+  resizeBgc();
+
+  function renderBgCode() {
+    if (!javaChars.length) javaChars = buildJavaChars();
+    bgCtx.clearRect(0,0,bgc.width,bgc.height);
+    bgCtx.font = Math.round(CH*0.72)+'px "JetBrains Mono",monospace';
+    bgCtx.textBaseline = 'top';
+    const cols = Math.ceil(bgc.width/CW)+1;
+    const rows = Math.ceil(bgc.height/CH)+1;
+    bgcCols = cols;
+    bgcGrid = new Array(cols * rows);
+    let idx = Math.floor(Math.random()*9999);
+    for (let r=0; r<rows; r++) {
+      for (let c=0; c<cols; c++) {
+        const jc = javaChars[idx++%javaChars.length];
+        bgcGrid[r*cols+c] = jc;                  // record for glow animation
+        bgCtx.globalAlpha = 0.048 + (((r*cols+c)*2654435761)>>>0)/0xffffffff * 0.032;
+        bgCtx.fillStyle = jc.color;
+        bgCtx.fillText(jc.char, c*CW, r*CH);
+      }
+    }
+    bgCtx.globalAlpha = 1;
+  }
+
+  window.addEventListener('resize', ()=>{ resize(); resizeBgc(); renderBgCode(); });
+  // Render after fonts are ready so JetBrains Mono metrics are correct
+  document.fonts.ready.then(renderBgCode);
+
+  // ── Java syntax-highlighted char stream — VS Code Dark+ palette ───────────
+  const C = {
+    kw:'#569cd6',   // keywords: public class void static
+    ty:'#4ec9b0',   // types: TalonFX, SubsystemBase
+    st:'#ce9178',   // strings
+    nu:'#b5cea8',   // numbers
+    cm:'#6a9955',   // comments
+    me:'#dcdcaa',   // method names
+    op:'#d4d4d4',   // operators
+    tx:'#d4d4d4'    // plain text
+  };
+  let javaChars = [];
+  let bgcGrid = [];   // [{char,color}, …] — flat row-major array of rendered cells
+  let bgcCols = 0;    // number of columns in the last bgc render
+
+  function buildJavaChars() {
+    const KW = new Set(['public','private','protected','class','interface','extends',
+      'implements','new','return','void','static','final','this','super','if','else',
+      'for','while','do','try','catch','import','var','abstract','enum','null','true',
+      'false','boolean','int','double','float','long','override','synchronized']);
+
+    const src = [
+      'public class DriveSubsystem extends SubsystemBase {',
+      '  private final TalonFX leftMotor = new TalonFX(1);',
+      '  private final TalonFX rightMotor = new TalonFX(2);',
+      '  private static final double MAX_SPEED = 0.85;',
+      '  // Configure closed-loop PID control',
+      '  public DriveSubsystem() {',
+      '    var cfg = new TalonFXConfiguration();',
+      '    cfg.Slot0.kP = 0.1; cfg.Slot0.kD = 0.002;',
+      '    leftMotor.getConfigurator().apply(cfg);',
+      '    rightMotor.getConfigurator().apply(cfg);',
+      '  }',
+      '  @Override public void periodic() {',
+      '    SmartDashboard.putNumber("leftVel",',
+      '      leftMotor.getVelocity().getValue());',
+      '    SmartDashboard.putNumber("rightVel",',
+      '      rightMotor.getVelocity().getValue());',
+      '  }',
+      '  public Command arcadeDrive(',
+      '      DoubleSupplier fwd, DoubleSupplier rot) {',
+      '    return run(() -> {',
+      '      double f = fwd.getAsDouble();',
+      '      double r = rot.getAsDouble();',
+      '      differentialDrive.arcadeDrive(f, r * 0.7);',
+      '    });',
+      '  }',
+      '}',
+      'public class ShooterSubsystem extends SubsystemBase {',
+      '  private SparkMax shooter = new SparkMax(5,',
+      '    SparkMax.MotorType.kBrushless);',
+      '  private static final int TARGET_RPM = 3500;',
+      '  // Shoot until sensor detects game piece',
+      '  public Command shoot() {',
+      '    return startEnd(',
+      '      () -> shooter.set(TARGET_RPM / 5700.0),',
+      '      () -> shooter.set(0.0));',
+      '  }',
+      '  public Command spinFlywheel(double rpm) {',
+      '    return Commands.run(() -> {',
+      '      flywheel.setControl(',
+      '        new VelocityVoltage(rpm / 60.0));',
+      '    }, this).until(() ->',
+      '      Math.abs(flywheel.getVelocity()',
+      '        .getValue() - rpm / 60.0) < 0.5);',
+      '  }',
+      '}',
+      'public class IntakeSubsystem extends SubsystemBase {',
+      '  private final SparkMax rollers = new SparkMax(7,',
+      '    SparkMax.MotorType.kBrushless);',
+      '  private final DigitalInput sensor = new DigitalInput(0);',
+      '  // Run until beam-break detects game piece',
+      '  public Command intakeUntilLoaded() {',
+      '    return run(() -> rollers.set(0.6))',
+      '      .until(sensor::get)',
+      '      .finallyDo(() -> rollers.set(0));',
+      '  }',
+      '}',
+      'public class RobotContainer {',
+      '  private final DriveSubsystem drive = new DriveSubsystem();',
+      '  private final ShooterSubsystem shooter = new ShooterSubsystem();',
+      '  private final CommandXboxController ctrl =',
+      '    new CommandXboxController(0);',
+      '  public RobotContainer() {',
+      '    configureBindings();',
+      '    drive.setDefaultCommand(',
+      '      drive.arcadeDrive(ctrl::getLeftY, ctrl::getRightX));',
+      '  }',
+      '  private void configureBindings() {',
+      '    ctrl.a().onTrue(shooter.shoot());',
+      '    ctrl.b().whileTrue(shooter.spinFlywheel(3500));',
+      '    ctrl.rightBumper().whileTrue(intake.intakeUntilLoaded());',
+      '    ctrl.x().onTrue(Commands.runOnce(drive::resetOdometry));',
+      '  }',
+      '}'
+    ].join('\n');
+
+    const chars = [];
+    let i = 0;
+    while (i < src.length) {
+      if (src[i] === '\n') { chars.push({char:' ', color:C.tx}); i++; continue; }
+      if (src[i]==='/' && src[i+1]==='/') {
+        let j=i; while(j<src.length&&src[j]!=='\n')j++;
+        for(let k=i;k<j;k++) chars.push({char:src[k],color:C.cm});
+        i=j; continue;
+      }
+      if (src[i]==='"') {
+        let j=i+1; while(j<src.length&&src[j]!=='"')j++;
+        for(let k=i;k<=j&&k<src.length;k++) chars.push({char:src[k],color:C.st});
+        i=j+1; continue;
+      }
+      if (/[0-9]/.test(src[i]) && (i===0||!/[a-zA-Z_]/.test(src[i-1]))) {
+        let j=i; while(j<src.length&&/[0-9.]/.test(src[j]))j++;
+        for(let k=i;k<j;k++) chars.push({char:src[k],color:C.nu});
+        i=j; continue;
+      }
+      if (src[i]==='@') {
+        let j=i+1; while(j<src.length&&/[a-zA-Z]/.test(src[j]))j++;
+        for(let k=i;k<j;k++) chars.push({char:src[k],color:C.me});
+        i=j; continue;
+      }
+      if (/[a-zA-Z_]/.test(src[i])) {
+        let j=i; while(j<src.length&&/[a-zA-Z0-9_]/.test(src[j]))j++;
+        const w=src.slice(i,j);
+        const col = KW.has(w) ? C.kw : /^[A-Z]/.test(w) ? C.ty :
+                    (j<src.length&&src[j]==='(') ? C.me : C.tx;
+        for(const ch of w) chars.push({char:ch,color:col});
+        i=j; continue;
+      }
+      chars.push({char:src[i], color:'=+-*/<>!&|?:'.includes(src[i])?C.op:C.tx});
+      i++;
+    }
+    return chars;
+  }
+
+  // ── Particle system ───────────────────────────────────────────────────────
+  const CW = 11, CH = 20;
+  let particles = [];
+
+  const CONTENT_SEL = 'h1,h2,.bigq,.code,.bullets li,.fcard,.stat,.tag,.tltitle,.tldesc,.lead,.ftitle,.sn,.flabel,.badge';
+
+  function getZones(el) {
+    const z = [];
+    el.querySelectorAll(CONTENT_SEL).forEach(node => {
+      const r = node.getBoundingClientRect();
+      if (r.width > 8 && r.height > 8) z.push(r);
+    });
+    return z;
+  }
+
+  function hitAny(px, py, zones) {
+    for (const z of zones) {
+      if (px>=z.left && px<z.right && py>=z.top && py<z.bottom) return true;
+    }
+    return false;
+  }
+
+  function initParticles(fromSlide, toSlide) {
+    if (!javaChars.length) javaChars = buildJavaChars();
+    particles = [];
+    const cw=canvas.width, ch=canvas.height;
+    const cols=Math.ceil(cw/CW)+1, rows=Math.ceil(ch/CH)+1;
+    const fromZ=getZones(fromSlide), toZ=getZones(toSlide);
+    const cx2=cw/2, cy2=ch/2;
+    let idx=Math.floor(Math.random()*javaChars.length);
+
+    for (let r=0; r<rows; r++) {
+      for (let c=0; c<cols; c++) {
+        const gx=c*CW, gy=r*CH;
+        const mx=gx+CW*0.5, my=gy+CH*0.5;
+        const jc=javaChars[idx++%javaChars.length];
+        const isToContent = hitAny(mx, my, toZ);
+
+        let sx, sy;
+        if (isToContent) {
+          // This particle will form incoming-slide content.
+          // Scatter in a RANDOM direction from its own grid position so that
+          // during coalesce every particle streams in from a unique angle
+          // toward its specific content-zone cell — looks like directed swarming
+          // rather than a generic zoom-in from the edges.
+          const angle = Math.random() * Math.PI * 2;
+          const push  = 180 + Math.random() * 230;
+          sx = gx + Math.cos(angle) * push;
+          sy = gy + Math.sin(angle) * push;
+        } else {
+          // Background particle: radial from screen centre (stays dim, not prominent)
+          const dx=mx-cx2, dy=my-cy2, len=Math.sqrt(dx*dx+dy*dy)||1;
+          const push = 90 + Math.random()*140;
+          sx = gx + (dx/len)*push + (Math.random()-0.5)*90;
+          sy = gy + (dy/len)*push*0.75 + (Math.random()-0.5)*70;
+        }
+
+        particles.push({
+          gx, gy, sx, sy,
+          char: jc.char, color: jc.color,
+          fa: hitAny(mx,my,fromZ) ? 0.55+Math.random()*0.45 : 0.04+Math.random()*0.07,
+          ta: isToContent         ? 0.55+Math.random()*0.45 : 0.04+Math.random()*0.07,
+          d: Math.random()*0.08,
+        });
+      }
+    }
+  }
+
+  // ── Easing ────────────────────────────────────────────────────────────────
+  const ease    = t => t<.5?2*t*t:-1+(4-2*t)*t;
+  const easeOut = t => 1-(1-t)*(1-t);
+  const easeIn  = t => t*t*t;
+  const clamp   = (v,a,b) => v<a?a:v>b?b:v;
+  const lerp    = (a,b,t) => a+(b-a)*t;
+  const norm    = (t,a,b) => clamp((t-a)/(b-a),0,1);
+
+  // ── Draw ──────────────────────────────────────────────────────────────────
+  // Five phases over FRAMES=210 (3.5 s at 60 fps):
+  //
+  //   Phase 1  t 0.000→0.286  (60f, 1.0s)  Appear — particles materialise at grid,
+  //                             bright at outgoing content zones
+  //   Phase 2  t 0.286→0.571  (60f, 1.0s)  Swarm — scatter, alpha crossfades
+  //                             outgoing→incoming layout, heavy glitching
+  //   Phase 3  t 0.571→0.714  (30f, 0.5s)  Coalesce — particles stream to grid,
+  //                             now lit for incoming layout
+  //   Hold     t 0.714→0.857  (30f, 0.5s)  Linger — fully coalesced, no fade;
+  //                             incoming slide fades in beneath the code
+  //   Fade     t 0.857→1.000  (30f, 0.5s)  Dissolve — particles fade out,
+  //                             leaving the slide fully revealed
+
+  function drawFrame(t) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.font = Math.round(CH*0.72)+'px "JetBrains Mono",monospace';
+    ctx.textBaseline = 'top';
+
+    // Alpha crossfade outgoing→incoming during scatter phase
+    const alphaBlend = ease(norm(t, 0.31, 0.59));
+    // Fade only starts AFTER the hold period ends
+    const globalFade = easeIn(norm(t, 0.857, 1.0));
+
+    for (const p of particles) {
+      const td = Math.max(0, t - p.d);
+
+      let px, py;
+      if (td <= 0.286) {
+        px = p.gx; py = p.gy;                                        // phase 1: at rest
+      } else if (td <= 0.571) {
+        const st = ease(norm(td, 0.286, 0.571));
+        px = lerp(p.gx, p.sx, st); py = lerp(p.gy, p.sy, st);      // phase 2: scatter
+      } else {
+        // Coalesce window extends to 0.82 so particles are fully settled
+        // by mid-hold, never feeling rushed
+        const ct = ease(norm(td, 0.571, 0.82));
+        px = lerp(p.sx, p.gx, ct); py = lerp(p.sy, p.gy, ct);      // phase 3+hold: coalesce
+      }
+
+      const appear = easeOut(norm(td, 0, 0.22));
+      const baseA  = lerp(p.fa, p.ta, alphaBlend);
+      const alpha  = baseA * appear * (1 - globalFade);
+
+      if (alpha < 0.015) continue;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.char, px, py);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Transition ────────────────────────────────────────────────────────────
+  const FRAMES = 210; // 3.5 s = 1s appear + 1s swarm + 0.5s coalesce + 0.5s hold + 0.5s fade
+
+  function go(to) {
+    if (to===cur||busy) return;
+    busy = true;
+    if (rafId) cancelAnimationFrame(rafId);
+
+    const fromSlide = slides[cur];
+    const toSlide   = slides[to];
+    cur = to;
+    updateUI();
+
+    initParticles(fromSlide, toSlide);
+    fromSlide.classList.remove('active');
+    canvas.style.opacity = '1';
+
+    let frame = 0, toShown = false;
+
+    function tick() {
+      const t = frame / FRAMES;
+
+      // Char glitching peaks at swarm-phase midpoint
+      if (t > 0.28 && t < 0.60) {
+        const intensity = Math.sin((t - 0.28) * Math.PI / 0.32);
+        const rate = 0.011 * intensity;
+        for (const p of particles) {
+          if (Math.random() < rate) {
+            const jc = javaChars[Math.floor(Math.random()*javaChars.length)];
+            p.char = jc.char; p.color = jc.color;
+          }
+        }
+      }
+
+      // Reveal incoming slide at start of hold — it fades in (0.28s CSS)
+      // while the coalesced code still lingers, so you see both overlaid
+      if (!toShown && t >= 0.714) {
+        toSlide.classList.add('active');
+        toShown = true;
+      }
+
+      drawFrame(t);
+      frame++;
+
+      if (frame <= FRAMES) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        canvas.style.opacity = '0';
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        busy = false; rafId = null;
+      }
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  // ── Input ──────────────────────────────────────────────────────────────────
+  document.getElementById('prev').addEventListener('click',()=>{ if(cur>0) go(cur-1); });
+  document.getElementById('next').addEventListener('click',()=>{ if(cur<N-1) go(cur+1); });
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown',' '].includes(e.key)){e.preventDefault();if(cur<N-1)go(cur+1);}
+    if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();if(cur>0)go(cur-1);}
+    if(e.key==='`'){const n=document.getElementById('nav');n.style.opacity=n.style.opacity==='0'?'1':'0';}
+  });
+
+  updateUI();
+
+  // ── Background code glow — lights up a real token from the bgc canvas ─────
+  // Picks a random cell, walks same-colour neighbours on the same row to find
+  // the full token, then overlays the kwflash div at the exact pixel position
+  // so it appears to be the background character itself brightening.
+
+  const kwEl = document.getElementById('kwflash');
+
+  // Plain-text colour — skip these (operators/identifiers rendered as white-ish)
+  const PLAIN = '#d4d4d4';
+
+  function flashKeyword() {
+    if (!bgcGrid.length || !bgcCols) return;
+
+    // Try up to 40 random cells looking for a colourful (non-plain, non-space) char
+    let cell = -1;
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const c = Math.floor(Math.random() * bgcGrid.length);
+      const jc = bgcGrid[c];
+      if (jc && jc.char !== ' ' && jc.color !== PLAIN) { cell = c; break; }
+    }
+    if (cell === -1) return;
+
+    const targetColor = bgcGrid[cell].color;
+    const row      = Math.floor(cell / bgcCols);
+    const rowStart = row * bgcCols;
+    const rowEnd   = rowStart + bgcCols;
+
+    // Walk left to find the token start
+    let tokStart = cell;
+    while (tokStart > rowStart) {
+      const prev = bgcGrid[tokStart - 1];
+      if (!prev || prev.char === ' ' || prev.color !== targetColor) break;
+      tokStart--;
+    }
+
+    // Walk right to find the token end
+    let tokEnd = cell;
+    while (tokEnd + 1 < rowEnd) {
+      const next = bgcGrid[tokEnd + 1];
+      if (!next || next.char === ' ' || next.color !== targetColor) break;
+      tokEnd++;
+    }
+
+    // Build the token string; skip trivial single-char tokens
+    let token = '';
+    for (let i = tokStart; i <= tokEnd; i++) token += bgcGrid[i].char;
+    token = token.trim();
+    if (token.length < 2) return;
+
+    // Position exactly over the bgc canvas cell
+    const col = tokStart % bgcCols;
+    const fs  = Math.round(CH * 0.72);
+
+    kwEl.textContent     = token;
+    kwEl.style.fontSize  = fs + 'px';
+    kwEl.style.left      = (col * CW) + 'px';
+    kwEl.style.top       = (row * CH) + 'px';
+    kwEl.style.color     = targetColor;
+    kwEl.style.opacity   = '0';
+    kwEl.style.textShadow = 'none';
+    kwEl.style.transition = 'none';
+
+    // Two rAF frames to flush the reset, then animate
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      kwEl.style.transition  = 'opacity 0.66s ease, text-shadow 0.66s ease';
+      kwEl.style.opacity     = '0.46';
+      kwEl.style.textShadow  =
+        `0 0 2px ${targetColor}, 0 0 7px ${targetColor}, 0 0 14px ${targetColor}`;
+
+      setTimeout(() => {
+        kwEl.style.transition  = 'opacity 1.44s ease, text-shadow 1.44s ease';
+        kwEl.style.opacity     = '0';
+        kwEl.style.textShadow  = 'none';
+      }, 1560);
+    }));
+  }
+
+  setTimeout(flashKeyword, 3000);      // first glow shortly after load
+  setInterval(flashKeyword, 10000);    // then every 10 s
+
+  // ── "Thank You" 6-second spiral coalesce ──────────────────────────────────
+  let thanksRaf = null;
+
+  function startThanksAnimation() {
+    const tc = document.getElementById('thanks-canvas');
+    if (!tc) return;
+    if (thanksRaf) { cancelAnimationFrame(thanksRaf); thanksRaf = null; }
+
+    const W = tc.width  = window.innerWidth;
+    const H = tc.height = window.innerHeight;
+    const tctx = tc.getContext('2d');
+
+    // ── Sample target pixels from offscreen Orbitron text ──────────────────
+    const fontSize = Math.round(Math.min(W * 0.22, H * 0.28, 200));
+    const lineGap  = fontSize * 1.2;
+    const midY = H / 2, cx = W / 2;
+
+    const off  = document.createElement('canvas');
+    off.width  = W;  off.height = H;
+    const octx = off.getContext('2d');
+    octx.font         = `700 ${fontSize}px Orbitron, "Space Grotesk", sans-serif`;
+    octx.textAlign    = 'center';
+    octx.textBaseline = 'middle';
+
+    // Render each word separately so every sampled pixel has an exact colour
+    octx.fillStyle = '#5b9bff';
+    octx.fillText('Thank', cx, midY - lineGap * 0.5);
+    const thankPx = octx.getImageData(0, 0, W, H).data;
+
+    octx.clearRect(0, 0, W, H);
+    octx.fillStyle = '#f5c842';
+    octx.fillText('You', cx, midY + lineGap * 0.5);
+    const youPx = octx.getImageData(0, 0, W, H).data;
+
+    const rawPts = [];
+    const STEP = 6;
+    for (let y = 0; y < H; y += STEP) {
+      for (let x = 0; x < W; x += STEP) {
+        const i = (y * W + x) * 4;
+        if (thankPx[i + 3] > 100)      rawPts.push({ x, y, color:'#5b9bff' });
+        else if (youPx[i + 3] > 100)   rawPts.push({ x, y, color:'#f5c842' });
+      }
+    }
+
+    // Shuffle and cap particle count
+    for (let i = rawPts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rawPts[i], rawPts[j]] = [rawPts[j], rawPts[i]];
+    }
+    const pts = rawPts.slice(0, 2800);
+    if (!pts.length) return;
+
+    if (!javaChars.length) javaChars = buildJavaChars();
+    const charFS = Math.round(CH * 0.72);
+
+    // Each particle spirals in from a random angle and distance
+    const parts = pts.map(p => {
+      const jc    = javaChars[Math.floor(Math.random() * javaChars.length)];
+      const ang0  = Math.random() * Math.PI * 2;
+      const r0    = 260 + Math.random() * 560;
+      const turns = (Math.random() > 0.5 ? 1 : -1) * (0.5 + Math.random() * 1.5);
+      return {
+        tx: p.x, ty: p.y,
+        ang0, r0, turns,
+        tcolor: p.color,   // final blue or gold
+        scolor: jc.color,  // starting syntax colour
+        char: jc.char,
+        d: Math.random() * 0.12,   // per-particle start delay (fraction of total)
+      };
+    });
+
+    const TOTAL_MS = 6000;
+    let t0 = null;
+
+    // Cubic ease-in-out for particle progress
+    const eio = t => t < 0.5 ? 4*t*t*t : 1 - (-2*t+2)**3/2;
+    // Cubic ease-out for radius (fast scatter, gentle landing)
+    const eo3 = t => 1 - (1-t)**3;
+
+    function tickThanks(ts) {
+      if (!t0) t0 = ts;
+      const t = Math.min((ts - t0) / TOTAL_MS, 1.0);
+
+      tctx.clearRect(0, 0, W, H);
+      tctx.font         = charFS + 'px "JetBrains Mono", monospace';
+      tctx.textBaseline = 'top';
+
+      for (const p of parts) {
+        // Per-particle delayed normalised time
+        const td   = Math.max(0, (t - p.d) / (1 - p.d));
+        if (td <= 0) continue;
+        const prog = eio(td);
+
+        // Spiral: radius shrinks (ease-out), angle rotates (linear in prog)
+        const r   = p.r0 * (1 - eo3(prog));
+        const ang = p.ang0 + p.turns * Math.PI * 2 * prog;
+        const px  = p.tx + Math.cos(ang) * r;
+        const py  = p.ty + Math.sin(ang) * r;
+
+        // Fade in quickly, stay opaque
+        const appear = Math.min(td * 8, 1);
+
+        // Colour: syntax colour → target (blue/gold) in the final 30%
+        const colT  = Math.max(0, (prog - 0.70) / 0.30);
+        tctx.fillStyle   = colT > 0.5 ? p.tcolor : p.scolor;
+        tctx.globalAlpha = appear * lerp(0.68, 0.96, colT);
+
+        tctx.fillText(p.char, px, py);
+      }
+      tctx.globalAlpha = 1;
+
+      if (t < 1.0) thanksRaf = requestAnimationFrame(tickThanks);
+    }
+
+    thanksRaf = requestAnimationFrame(tickThanks);
+  }
+
+  // Observe the thanks slide's active class to start/stop the animation
+  const thanksSl = document.getElementById('sthanks');
+  if (thanksSl) {
+    new MutationObserver(() => {
+      if (thanksSl.classList.contains('active')) {
+        startThanksAnimation();
+      } else {
+        if (thanksRaf) { cancelAnimationFrame(thanksRaf); thanksRaf = null; }
+        const tc = document.getElementById('thanks-canvas');
+        if (tc) tc.getContext('2d').clearRect(0, 0, tc.width, tc.height);
+      }
+    }).observe(thanksSl, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
+</script>
+</body>
+</html>
